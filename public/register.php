@@ -1,89 +1,30 @@
 <?php
 require_once __DIR__ . '/../app/db.php';
+require_once __DIR__ . '/../app/services/RegistrationService.php';
+
+$service = new RegistrationService($pdo);
 
 $inviteToken = $_GET['invite'] ?? '';
 $error = '';
 $success = '';
+$linkType = '';
 
-// 1️⃣ Check if invite token exists in admin_links
-$stmt = $pdo->prepare("SELECT * FROM admin_links WHERE link = ?");
-$stmt->execute([$inviteToken]);
-$invite = $stmt->fetch(PDO::FETCH_ASSOC);
+$validation = $service->validateInvite($inviteToken);
 
-if (!$invite) {
-    die('Invalid invite link.');
+if (!$validation['valid']) {
+    die($validation['message']);
 }
 
-// 2️⃣ Check if this link has already been used
-$stmt = $pdo->prepare("SELECT * FROM invited_users WHERE invite_link = ?");
-$stmt->execute([$inviteToken]);
-$used = $stmt->fetch(PDO::FETCH_ASSOC);
+$linkType = $validation['invite']['type'];
 
-if ($used) {
-    die('This invite link has already been used.');
-}
-
-$linkType = $invite['type']; // 'Hauptgast' or '+1 Link'
-
-// 3️⃣ Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $firstname = trim($_POST['firstname'] ?? '');
-    $lastname = trim($_POST['lastname'] ?? '');
-    $firstname_mainguest = trim((string)($_POST['firstname_mainguest'] ?? ''));
-    $lastname_mainguest = trim((string)($_POST['lastname_mainguest'] ?? ''));
-    $attendance_days = $_POST['attendance_days'] ?? '';
 
-    // Basic required validation
-    if (!$firstname || !$lastname || !$attendance_days) {
-        $error = "Please fill in all mandatory fields.";
-    } elseif ($linkType === '+1 Link') {
-        if (!$firstname_mainguest || !$lastname_mainguest) {
-            $error = "Please fill in the Hauptgast fields for +1 registration.";
-        } else {
-            // Check that the Hauptgast exists and is unique
-            $stmt = $pdo->prepare("
-                SELECT COUNT(*) AS count
-                FROM invited_users
-                WHERE firstname = ? 
-                  AND lastname = ? 
-                  AND firstname_mainguest IS NULL 
-                  AND lastname_mainguest IS NULL
-            ");
-            $stmt->execute([$firstname_mainguest, $lastname_mainguest]);
-            $hauptgastCount = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    $result = $service->register($_POST, $inviteToken, $linkType);
 
-            if ($hauptgastCount == 0) {
-                $error = "The Hauptgast reference is invalid or not unique. +1 registration rejected.";
-            }
-
-            $stmt = $pdo->prepare("
-                SELECT COUNT(*) AS count
-                FROM invited_users
-                WHERE firstname_mainguest = ? 
-                  AND lastname_mainguest = ?
-            ");
-            $stmt->execute([$firstname_mainguest, $lastname_mainguest]);
-            $plusoneCount = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
-
-            if ($plusoneCount >= 1) {
-                $error = "The Hauptgast already has a +1 guest registered.";
-            }
-        }
+    if ($result['success']) {
+        $success = "Registrierung erfolgreich. Vielen Dank!";
     } else {
-        // Hauptgast link: ignore mainguest fields
-        $firstname_mainguest = null;
-        $lastname_mainguest = null;
-    }
-
-    // If no errors, insert user
-    if (!$error) {
-        $stmt = $pdo->prepare("
-            INSERT INTO invited_users
-            (invite_link, firstname, lastname, firstname_mainguest, lastname_mainguest, attendance_days)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ");
-        $stmt->execute([$inviteToken, $firstname, $lastname, $firstname_mainguest, $lastname_mainguest, $attendance_days]);
-        $success = "Registration successful! Thank you.";
+        $error = $result['message'];
     }
 }
 ?>
@@ -91,41 +32,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>User Registration</title>
+    <meta charset="UTF-8">
+    <title>Registrierung</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 </head>
 <body>
-    <h1>User Registration</h1>
 
-    <?php if ($error) echo "<p style='color:red;'>$error</p>"; ?>
-    <?php if ($success) {
-        echo "<p style='color:green;'>$success</p>";
-    } else { ?>
-        <form method="POST" action="">
-            <label>First Name*:</label>
-            <input type="text" name="firstname" required><br><br>
+<h1>Registrierung</h1>
 
-            <label>Last Name*:</label>
-            <input type="text" name="lastname" required><br><br>
+<?php if ($error): ?>
+    <p style="color:red;"><?php echo htmlspecialchars($error); ?></p>
+<?php endif; ?>
 
-            <?php if ($linkType === '+1 Link'): ?>
-                <label>Hauptgast First Name*:</label>
-                <input type="text" name="firstname_mainguest" required><br><br>
+<?php if ($success): ?>
+    <p style="color:green;"><?php echo htmlspecialchars($success); ?></p>
+<?php else: ?>
 
-                <label>Hauptgast Last Name*:</label>
-                <input type="text" name="lastname_mainguest" required><br><br>
-            <?php endif; ?>
+<form method="POST">
 
-            <label>Attendance Days*:</label>
-            <select name="attendance_days" required>
-                <option value="">--Select--</option>
-                <option value="1">Fr</option>
-                <option value="2">Sa</option>
-                <option value="3">Beide</option>
-            </select><br><br>
+    <label>Vorname*:</label>
+    <input class="form-input" type="text" name="firstname" required><br><br>
 
-            <button type="submit">Register</button>
-        </form>
-    <?php } ?>
+    <label>Nachname*:</label>
+    <input type="text" name="lastname" required><br><br>
+
+    <?php if ($linkType === '+1 Link'): ?>
+
+        <label>Vorname Hauptgast*:</label>
+        <input type="text" name="firstname_mainguest" required><br><br>
+
+        <label>Nachname Hauptgast*:</label>
+        <input type="text" name="lastname_mainguest" required><br><br>
+
+    <?php endif; ?>
+
+    <label>Anwesenheit*:</label>
+    <select name="attendance_days" required>
+        <option value="">-- Bitte auswählen --</option>
+        <option value="1">Freitag</option>
+        <option value="2">Samstag</option>
+        <option value="3">Beide Tage</option>
+    </select><br><br>
+
+    <button type="submit">Registrieren</button>
+
+</form>
+
+<?php endif; ?>
 
 </body>
 </html>

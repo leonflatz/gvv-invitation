@@ -1,23 +1,25 @@
 <?php
 session_start();
+
 require_once __DIR__ . '/../app/db.php';
+require_once __DIR__ . '/../app/services/AdminService.php';
+
+$service = new AdminService($pdo);
+$error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'] ?? '';
+
+    $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    // Fetch admin record
-    $stmt = $pdo->prepare("SELECT * FROM admins WHERE username = ?");
-    $stmt->execute([$username]);
-    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+    $result = $service->login($username, $password);
 
-    if ($admin && password_verify($password, $admin['password'])) {
-        // Valid login
-        $_SESSION['admin_id'] = $admin['id'];
+    if ($result['success']) {
+        $_SESSION['admin_id'] = $result['admin_id'];
         header('Location: dashboard.php');
         exit;
     } else {
-        $error = "Invalid username or password.";
+        $error = $result['message'];
     }
 }
 ?>
@@ -25,17 +27,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login</title>
+    <meta charset="UTF-8">
+    <title>Admin-Anmeldung</title>
 </head>
 <body>
-    <h1>Admin Login</h1>
-    <?php if (!empty($error)) echo "<p style='color:red;'>$error</p>"; ?>
-    <form action="" method="POST">
-        <label>Username:</label>
+
+    <h1>Admin-Anmeldung</h1>
+
+    <?php if (!empty($error)): ?>
+        <p style="color:red;">
+            <?php echo htmlspecialchars($error); ?>
+        </p>
+    <?php endif; ?>
+
+    <form method="POST">
+        <label>Benutzername:</label>
         <input type="text" name="username" required><br><br>
-        <label>Password:</label>
+
+        <label>Passwort:</label>
         <input type="password" name="password" required><br><br>
-        <button type="submit">Login</button>
+
+        <button type="submit">Anmelden</button>
     </form>
+
 </body>
 </html>
