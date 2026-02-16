@@ -29,56 +29,87 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Registrierung</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-</head>
-<body>
 
-<h1>Registrierung</h1>
+<?php include '../templates/header.php'; ?>
 
-<?php if ($error): ?>
-    <p style="color:red;"><?php echo htmlspecialchars($error); ?></p>
-<?php endif; ?>
+<style>
+    body {
+        background: url('./img/riad-grafiti-sc.png') no-repeat center center fixed; 
+        background-size: cover;
+    }
+    .card-alive {
+        background: rgba(255, 255, 255, 0.95);
+    }
+</style>
 
-<?php if ($success): ?>
-    <p style="color:green;"><?php echo htmlspecialchars($success); ?></p>
-<?php else: ?>
+<div class="row justify-content-center my-5">
+    <div class="col-md-8 col-lg-6">
+        <div class="card card-alive shadow-lg border-0">
+            <div class="card-header card-alive-header text-center py-4">
+                <h2 class="mb-0 fw-bold">Registrierung</h2>
+            </div>
+            <div class="card-body p-4 p-md-5">
 
-<form method="POST">
+                <?php if ($error): ?>
+                    <div class="alert alert-danger" role="alert">
+                        <?php echo htmlspecialchars($error); ?>
+                    </div>
+                <?php endif; ?>
 
-    <label>Vorname*:</label>
-    <input class="form-input" type="text" name="firstname" required><br><br>
+                <?php if ($success): ?>
+                    <div class="alert alert-success" role="alert">
+                        <h4 class="alert-heading">Vielen Dank!</h4>
+                        <p><?php echo htmlspecialchars($success); ?></p>
+                        <hr>
+                        <p class="mb-0">Wir freuen uns auf Sie.</p>
+                    </div>
+                <?php else: ?>
 
-    <label>Nachname*:</label>
-    <input type="text" name="lastname" required><br><br>
+                <form method="POST" class="needs-validation" novalidate>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label for="firstname" class="form-label">Vorname*</label>
+                            <input type="text" class="form-control" id="firstname" name="firstname" required>
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="lastname" class="form-label">Nachname*</label>
+                            <input type="text" class="form-control" id="lastname" name="lastname" required>
+                        </div>
 
-    <?php if ($linkType === '+1 Link'): ?>
+                        <?php if ($linkType === '+1 Link'): ?>
+                            <div class="col-12 mt-4">
+                                <h5 class="border-bottom pb-2 mb-3">Hauptgast Details</h5>
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="firstname_mainguest" class="form-label">Vorname Hauptgast*</label>
+                                <input type="text" class="form-control" id="firstname_mainguest" name="firstname_mainguest" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="lastname_mainguest" class="form-label">Nachname Hauptgast*</label>
+                                <input type="text" class="form-control" id="lastname_mainguest" name="lastname_mainguest" required>
+                            </div>
+                        <?php endif; ?>
 
-        <label>Vorname Hauptgast*:</label>
-        <input type="text" name="firstname_mainguest" required><br><br>
+                        <div class="col-12 mt-4">
+                            <label for="attendance_days" class="form-label">Anwesenheit*</label>
+                            <select class="form-select" id="attendance_days" name="attendance_days" required>
+                                <option value="" selected disabled>-- Bitte auswählen --</option>
+                                <option value="1">Freitag</option>
+                                <option value="2">Samstag</option>
+                                <option value="3">Beide Tage</option>
+                            </select>
+                        </div>
 
-        <label>Nachname Hauptgast*:</label>
-        <input type="text" name="lastname_mainguest" required><br><br>
+                        <div class="col-12 mt-4 d-grid">
+                            <button type="submit" class="btn btn-alive btn-lg">Jetzt Registrieren</button>
+                        </div>
+                    </div>
+                </form>
 
-    <?php endif; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <label>Anwesenheit*:</label>
-    <select name="attendance_days" required>
-        <option value="">-- Bitte auswählen --</option>
-        <option value="1">Freitag</option>
-        <option value="2">Samstag</option>
-        <option value="3">Beide Tage</option>
-    </select><br><br>
-
-    <button type="submit">Registrieren</button>
-
-</form>
-
-<?php endif; ?>
-
-</body>
-</html>
+<?php include '../templates/footer.php'; ?>

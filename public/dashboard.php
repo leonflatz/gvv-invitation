@@ -57,71 +57,113 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Admin-Bereich</title>
-</head>
-<body>
 
-    <h1>Admin-Bereich</h1>
+<?php include '../templates/header.php'; ?>
 
-    <p>Willkommen, <?php echo htmlspecialchars($admin['username'] ?? ''); ?>!</p>
-    <p><a href="logout.php">Abmelden</a></p>
+<div class="container my-5">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h1 class="display-4 fw-bold text-dark">Dashboard</h1>
+            <p class="lead text-muted">Willkommen zurück, <?php echo htmlspecialchars($admin['username'] ?? ''); ?>!</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="view_users.php" class="btn btn-alive btn-lg shadow-sm">
+                 Alle Registrierungen ansehen
+            </a>
+            <a href="logout.php" class="btn btn-outline-secondary btn-lg ms-2">Abmelden</a>
+        </div>
+    </div>
 
-    <hr>
+    <hr class="mb-5">
 
-    <h2>Einladungslinks generieren</h2>
+    <div class="row g-4">
+        <!-- Generate Links Column -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                    <h3 class="card-title fw-bold text-primary">
+                        Einladungslinks
+                    </h3>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Anzahl Hauptgast-Links</label>
+                            <input type="number" class="form-control form-control-lg" name="num_hauptgast" min="0" value="0">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Anzahl +1-Links</label>
+                            <input type="number" class="form-control form-control-lg" name="num_plusone" min="0" value="0">
+                        </div>
+                        <button type="submit" name="generate_invite" class="btn btn-primary w-100 py-2 fw-bold">
+                            Links generieren
+                        </button>
+                    </form>
 
-    <form method="POST">
-        <label>Anzahl Hauptgast-Links:</label>
-        <input type="number" name="num_hauptgast" min="0" value="0"><br><br>
+                    <?php if (!empty($generatedHauptgast) || !empty($generatedPlusOne)): ?>
+                        <div class="mt-4 p-3 bg-light rounded">
+                            <?php if (!empty($generatedHauptgast)): ?>
+                                <h6 class="fw-bold mb-2">Neue Hauptgast-Links:</h6>
+                                <ul class="list-unstyled mb-3">
+                                    <?php foreach ($generatedHauptgast as $link): ?>
+                                        <li class="mb-2">
+                                            <input type="text" class="form-control form-control-sm font-monospace" value="<?php echo htmlspecialchars($link); ?>" readonly onclick="this.select()">
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            <?php endif; ?>
 
-        <label>Anzahl +1-Links:</label>
-        <input type="number" name="num_plusone" min="0" value="0"><br><br>
+                            <?php if (!empty($generatedPlusOne)): ?>
+                                <h6 class="fw-bold mb-2">Neue +1-Links:</h6>
+                                <ul class="list-unstyled mb-0">
+                                    <?php foreach ($generatedPlusOne as $link): ?>
+                                        <li class="mb-2">
+                                            <input type="text" class="form-control form-control-sm font-monospace" value="<?php echo htmlspecialchars($link); ?>" readonly onclick="this.select()">
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
 
-        <button type="submit" name="generate_invite">Links generieren</button>
-    </form>
+        <!-- Whitelist Column -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                    <h3 class="card-title fw-bold text-success">
+                        Whitelist Management
+                    </h3>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <?php if ($whitelistMessage): ?>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <?php echo htmlspecialchars($whitelistMessage); ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    <?php endif; ?>
 
-    <?php if (!empty($generatedHauptgast)): ?>
-        <h3>Hauptgast-Links:</h3>
-        <ul>
-            <?php foreach ($generatedHauptgast as $link): ?>
-                <li>
-                    <input type="text" value="<?php echo htmlspecialchars($link); ?>" readonly size="60">
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    <?php endif; ?>
+                    <form method="POST">
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Vorname</label>
+                                <input type="text" class="form-control" name="wl_firstname" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Nachname</label>
+                                <input type="text" class="form-control" name="wl_lastname" required>
+                            </div>
+                        </div>
+                        <button type="submit" name="add_whitelist" class="btn btn-success w-100 py-2 fw-bold">
+                            Zur Whitelist hinzufügen
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <?php if (!empty($generatedPlusOne)): ?>
-        <h3>+1-Links:</h3>
-        <ul>
-            <?php foreach ($generatedPlusOne as $link): ?>
-                <li>
-                    <input type="text" value="<?php echo htmlspecialchars($link); ?>" readonly size="60">
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    <?php endif; ?>
-
-    <hr>
-
-    <h2>Name zur Whitelist hinzufügen</h2>
-
-    <?php if ($whitelistMessage): ?>
-        <p><?php echo htmlspecialchars($whitelistMessage); ?></p>
-    <?php endif; ?>
-
-    <form method="POST">
-        <label>Vorname:</label>
-        <input type="text" name="wl_firstname" required><br><br>
-
-        <label>Nachname:</label>
-        <input type="text" name="wl_lastname" required><br><br>
-
-        <button type="submit" name="add_whitelist">Zur Whitelist hinzufügen</button>
-    </form>
-
-</body>
-</html>
+<?php include '../templates/footer.php'; ?>

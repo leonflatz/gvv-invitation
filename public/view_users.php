@@ -19,49 +19,63 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
 // Daten für Tabelle laden
 $users = $csvService->getAllUsers();
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Registrierte Personen</title>
-</head>
-<body>
 
-<h1>Registrierte Personen</h1>
+<?php include '../templates/header.php'; ?>
 
-<p>
-    <a href="dashboard.php">Zurück zum Admin-Bereich</a> |
-    <a href="?export=csv">CSV exportieren</a>
-</p>
+<div class="container my-5">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h1 class="display-4 fw-bold text-dark">Registrierte Personen</h1>
+            <p class="lead text-muted">Übersicht aller Anmeldungen</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+             <a href="?export=csv" class="btn btn-success btn-lg shadow-sm">
+                 <span class="me-2">CSV Exportieren</span>
+            </a>
+            <a href="dashboard.php" class="btn btn-outline-secondary btn-lg ms-2">Zurück</a>
+        </div>
+    </div>
 
-<table border="1" cellpadding="5" cellspacing="0">
-    <thead>
-        <tr>
-            <th>Einladungslink</th>
-            <th>Vorname</th>
-            <th>Nachname</th>
-            <th>Vorname Hauptgast</th>
-            <th>Nachname Hauptgast</th>
-            <th>Anwesenheit</th>
-        </tr>
-    </thead>
-    <tbody>
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="py-3 px-4">Einladungslink</th>
+                            <th class="py-3 px-4">Vorname</th>
+                            <th class="py-3 px-4">Nachname</th>
+                            <th class="py-3 px-4">Vorname Hauptgast</th>
+                            <th class="py-3 px-4">Nachname Hauptgast</th>
+                            <th class="py-3 px-4">Anwesenheit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php if (empty($users)): ?>
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">Keine Registrierungen gefunden.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($users as $user): ?>
+                            <tr>
+                                <td class="px-4 py-3 font-monospace small"><?php echo htmlspecialchars($user['invite_link'] ?? '-'); ?></td>
+                                <td class="px-4 py-3 fw-bold"><?php echo htmlspecialchars($user['firstname'] ?? ''); ?></td>
+                                <td class="px-4 py-3 fw-bold"><?php echo htmlspecialchars($user['lastname'] ?? ''); ?></td>
+                                <td class="px-4 py-3 text-muted"><?php echo htmlspecialchars($user['firstname_mainguest'] ?? '-'); ?></td>
+                                <td class="px-4 py-3 text-muted"><?php echo htmlspecialchars($user['lastname_mainguest'] ?? '-'); ?></td>
+                                <td class="px-4 py-3">
+                                    <span class="badge rounded-pill bg-primary">
+                                        <?php echo htmlspecialchars($csvService->attendanceLabel($user['attendance_days'] ?? '')); ?>
+                                    </span>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <?php foreach ($users as $user): ?>
-        <tr>
-            <td><?php echo htmlspecialchars((string)($user['invite_link'] ?? '')); ?></td>
-            <td><?php echo htmlspecialchars((string)($user['firstname'] ?? '')); ?></td>
-            <td><?php echo htmlspecialchars((string)($user['lastname'] ?? '')); ?></td>
-            <td><?php echo htmlspecialchars((string)($user['firstname_mainguest'] ?? '')); ?></td>
-            <td><?php echo htmlspecialchars((string)($user['lastname_mainguest'] ?? '')); ?></td>
-            <td>
-                <?php echo htmlspecialchars($csvService->attendanceLabel($user['attendance_days'] ?? '')); ?>
-            </td>
-        </tr>
-    <?php endforeach; ?>
-
-    </tbody>
-</table>
-
-</body>
-</html>
+<?php include '../templates/footer.php'; ?>

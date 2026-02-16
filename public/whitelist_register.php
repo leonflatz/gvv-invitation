@@ -22,45 +22,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Whitelist-Registrierung</title>
-</head>
-<body>
 
-<h1>Whitelist-Registrierung</h1>
+<?php include '../templates/header.php'; ?>
 
-<?php if ($error): ?>
-    <p style="color:red;"><?php echo htmlspecialchars($error); ?></p>
-<?php endif; ?>
+<style>
+    body {
+        background: url('./img/riad-grafiti-sc.png') no-repeat center center fixed; 
+        background-size: cover;
+    }
+    .card-alive {
+        background: rgba(255, 255, 255, 0.95);
+    }
+</style>
 
-<?php if ($success): ?>
-    <p style="color:green;"><?php echo htmlspecialchars($success); ?></p>
-<?php else: ?>
+<div class="row justify-content-center my-5">
+    <div class="col-md-8 col-lg-6">
+        <div class="card card-alive shadow-lg border-0">
+            <div class="card-header card-alive-header text-center py-4">
+                <h2 class="mb-0 fw-bold">Whitelist Registrierung</h2>
+            </div>
+            <div class="card-body p-4 p-md-5">
 
-<form method="POST">
+                <?php if ($error): ?>
+                    <div class="alert alert-danger" role="alert">
+                        <?php echo htmlspecialchars($error); ?>
+                    </div>
+                <?php endif; ?>
 
-    <label>Vorname*:</label>
-    <input type="text" name="firstname" required><br><br>
+                <?php if ($success): ?>
+                    <div class="alert alert-success" role="alert">
+                        <h4 class="alert-heading">Vielen Dank!</h4>
+                        <p><?php echo htmlspecialchars($success); ?></p>
+                        <hr>
+                        <p class="mb-0">Wir prüfen Ihre Anfrage.</p>
+                    </div>
+                <?php else: ?>
 
-    <label>Nachname*:</label>
-    <input type="text" name="lastname" required><br><br>
+                <form method="POST" class="needs-validation" novalidate>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label for="firstname" class="form-label">Vorname*</label>
+                            <input type="text" class="form-control" id="firstname" name="firstname" required>
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="lastname" class="form-label">Nachname*</label>
+                            <input type="text" class="form-control" id="lastname" name="lastname" required>
+                        </div>
 
-    <label>Anwesenheit*:</label>
-    <select name="attendance_days" required>
-        <option value="">-- Bitte auswählen --</option>
-        <option value="1">Freitag</option>
-        <option value="2">Samstag</option>
-        <option value="3">Freitag und Samstag</option>
-    </select><br><br>
+                        <div class="col-12 mt-4">
+                            <label for="attendance_days" class="form-label">Anwesenheit*</label>
+                            <select class="form-select" id="attendance_days" name="attendance_days" required>
+                                <option value="" selected disabled>-- Bitte auswählen --</option>
+                                <option value="1">Freitag</option>
+                                <option value="2">Samstag</option>
+                                <option value="3">Beide Tage</option>
+                            </select>
+                        </div>
 
-    <button type="submit">Registrieren</button>
+                        <div class="col-12 mt-4 d-grid">
+                            <button type="submit" class="btn btn-alive btn-lg">Jetzt Registrieren</button>
+                        </div>
+                    </div>
+                </form>
 
-</form>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
 
-<?php endif; ?>
-
-</body>
-</html>
+<?php include '../templates/footer.php'; ?>
