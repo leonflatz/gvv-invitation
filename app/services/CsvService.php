@@ -23,11 +23,21 @@ class CsvService
         header('Content-Disposition: attachment; filename="registrierte_personen.csv"');
 
         $output = fopen('php://output', 'w');
+        
+        // UTF-8 BOM für Excel
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
 
         // Kopfzeile
         fputcsv(
             $output,
-            ['Admin', 'Name', 'Hauptgast', 'Anwesenheit'],
+            [
+                'Einladender Admin', 
+                'Vorname', 
+                'Nachname', 
+                'Vorname Hauptgast', 
+                'Nachname Hauptgast', 
+                'Anwesenheit'
+            ],
             ';',
             '"',
             '\\'
@@ -37,17 +47,14 @@ class CsvService
 
             $days = $this->attendanceLabel($row['attendance_days']);
 
-            $hauptgastName = trim(
-                (string)($row['firstname_mainguest'] ?? '') . ' ' .
-                (string)($row['lastname_mainguest'] ?? '')
-            );
-
             fputcsv(
                 $output,
                 [
                     (string)$row['admin_username'],
-                    (string)$row['firstname'] . ' ' . (string)$row['lastname'],
-                    $hauptgastName,
+                    (string)$row['firstname'],
+                    (string)$row['lastname'],
+                    (string)($row['firstname_mainguest'] ?? ''),
+                    (string)($row['lastname_mainguest'] ?? ''),
                     $days
                 ],
                 ';',
