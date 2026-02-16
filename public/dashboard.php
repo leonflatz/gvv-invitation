@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a href="view_users.php" class="btn btn-alive btn-lg shadow-sm">
                  Alle Registrierungen ansehen
             </a>
-            <a href="logout.php" class="btn btn-outline-secondary btn-lg ms-2">Abmelden</a>
+            <a href="logout.php" class="btn btn-outline-secondary btn-lg ms-4">Abmelden</a>
         </div>
     </div>
 
@@ -100,29 +100,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </button>
                     </form>
 
+
                     <?php if (!empty($generatedHauptgast) || !empty($generatedPlusOne)): ?>
                         <div class="mt-4 p-3 bg-light rounded">
-                            <?php if (!empty($generatedHauptgast)): ?>
-                                <h6 class="fw-bold mb-2">Neue Hauptgast-Links:</h6>
-                                <ul class="list-unstyled mb-3">
-                                    <?php foreach ($generatedHauptgast as $link): ?>
-                                        <li class="mb-2">
-                                            <input type="text" class="form-control form-control-sm font-monospace" value="<?php echo htmlspecialchars($link); ?>" readonly onclick="this.select()">
-                                        </li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            <?php endif; ?>
+                            <form action="export_word.php" method="POST" target="_blank">
+                                <?php if (!empty($generatedHauptgast)): ?>
+                                    <h6 class="fw-bold mb-2">Neue Hauptgast-Links:</h6>
+                                    <ul class="list-unstyled mb-3">
+                                        <?php foreach ($generatedHauptgast as $link): ?>
+                                            <li class="mb-2">
+                                                <input type="text" class="form-control form-control-sm font-monospace" value="<?php echo htmlspecialchars($link); ?>" readonly onclick="this.select()">
+                                                <input type="hidden" name="hauptgast_links[]" value="<?php echo htmlspecialchars($link); ?>">
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                <?php endif; ?>
 
-                            <?php if (!empty($generatedPlusOne)): ?>
-                                <h6 class="fw-bold mb-2">Neue +1-Links:</h6>
-                                <ul class="list-unstyled mb-0">
-                                    <?php foreach ($generatedPlusOne as $link): ?>
-                                        <li class="mb-2">
-                                            <input type="text" class="form-control form-control-sm font-monospace" value="<?php echo htmlspecialchars($link); ?>" readonly onclick="this.select()">
-                                        </li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            <?php endif; ?>
+                                <?php if (!empty($generatedPlusOne)): ?>
+                                    <h6 class="fw-bold mb-2">Neue +1-Links:</h6>
+                                    <ul class="list-unstyled mb-0">
+                                        <?php foreach ($generatedPlusOne as $link): ?>
+                                            <li class="mb-2">
+                                                <input type="text" class="form-control form-control-sm font-monospace" value="<?php echo htmlspecialchars($link); ?>" readonly onclick="this.select()">
+                                                <input type="hidden" name="plusone_links[]" value="<?php echo htmlspecialchars($link); ?>">
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                <?php endif; ?>
+
+                                <div class="mt-3">
+                                    <button type="submit" class="btn btn-outline-primary btn-sm">
+                                        Als Word-Datei exportieren (mit QR-Codes)
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     <?php endif; ?>
                 </div>

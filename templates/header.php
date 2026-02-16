@@ -56,6 +56,17 @@ if (session_status() === PHP_SESSION_NONE) {
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
+        <?php if (isset($_GET['login_error'])): ?>
+            <div class="alert alert-danger" role="alert">
+                Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Daten.
+            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    var myModal = new bootstrap.Modal(document.getElementById('loginModal'));
+                    myModal.show();
+                });
+            </script>
+        <?php endif; ?>
         <form action="login.php" method="POST">
             <div class="mb-3">
                 <label for="username" class="form-label">Benutzername</label>

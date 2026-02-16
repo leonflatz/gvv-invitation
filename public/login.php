@@ -19,7 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: dashboard.php');
         exit;
     } else {
-        $error = $result['message'];
+        header('Location: index.php?login_error=1');
+        exit;
     }
 }
 ?>
